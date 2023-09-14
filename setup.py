@@ -6,10 +6,16 @@ setup(
     description='A package for statistical education tools',
     author='surish',
     author_email='sbhath17@gmail.com',
-    url='https://github.com/yourusername/statool-edu',
+    url='https://github.com/Surihub/statool-edu',
     packages=find_packages(),
     install_requires=[
         # List your dependencies here
+        'koreanize-matplotlib==0.1.1',
+        'matplotlib==3.7.1',
+        'numpy==1.23.5',
+        'seaborn==0.12.2',
+        'plotly==5.16.1',
+        'scipy==1.10.1'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
