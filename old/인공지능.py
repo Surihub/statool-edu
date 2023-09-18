@@ -7,28 +7,15 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
-
 import pandas as pd
 import numpy as np
-
-# datasets.load_breast_cancer()
-# datasets.load_diabetes()
-# datasets.load_digits()
-# datasets.load_files()
-# datasets.load_iris()
-# datasets.load_digits()
-# datasets.load_sample_image()
-# datasets.load_svmlight_file()
-# datasets.load_wine()
 
 dataset_dict = {
     '와인': datasets.load_wine(),
     '유방암': datasets.load_breast_cancer(),
     '당뇨병': datasets.load_diabetes(),
     '붓꽃': datasets.load_iris(),
-    '손글씨': datasets.load_digits(),
-    # '파일데이터': datasets.load_svmlight_file(),
-    # '이미지': datasets.load_sample_image()
+    '손글씨': datasets.load_digits()
 }
 
 def 데이터불러오기(data):    
@@ -111,10 +98,6 @@ def 모델_평가(X_test, y_test, model):
         print('\n')
 
         return np.round(r_squared, 4)
-
-
-
-
 
 def 모델_선택(모델명):
     모델_딕셔너리 = {
