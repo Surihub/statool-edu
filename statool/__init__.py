@@ -4,7 +4,7 @@ __version__ = '0.0.1'
 import seaborn as sns
 
 sns.set_style("darkgrid")
-sns.set_palette("pastel")
+sns.set_palette("colorblind")
 
 # 플롯에 한글 설정하기
 import koreanize_matplotlib
@@ -15,7 +15,8 @@ import koreanize_matplotlib
 ####################데이터 처리######################
 #####################################################
 
-
+def 데이터유형(df):
+    return df
 def 숫자로변환(df):
     # 모든 열을 순회하며 범주형 열만 선택
     categorical_columns = df.select_dtypes(include=['category', 'object']).columns
@@ -82,10 +83,10 @@ def 히스토그램(원자료, 열이름, 계급시작값, 계급의크기):
 
 def 상자그림(원자료, 열이름, 구분=None):
     if 구분 is None:
-        sns.boxplot(data = 원자료, x = 열이름)
+        sns.boxplot(data = 원자료, y = 열이름)
         plt.title(f'{열이름} 상자그림')
     else:
-        sns.boxplot(data=원자료, x=열이름, hue=구분)
+        sns.boxplot(data=원자료, y=열이름, x=구분)
         plt.title(f'{구분}에 따른 {열이름} 상자그림')
     plt.show()
 
@@ -339,20 +340,28 @@ def 데이터불러오기(data):
         
         # 데이터를 Pandas DataFrame으로 변환
         df = pd.DataFrame(data=dataset.data, columns=dataset.feature_names)
+        # display(df)
         df['target'] = dataset.target  # 클래스 정보를 추가    
 
     elif data == '펭귄':
         df = sns.load_dataset("penguins")
         df.columns = ['종류', '서식지', '부리 길이', '부리 깊이', '날개 길이', '몸무게', '성별']    
+    elif data == '비디오게임':
+        df = pd.read_csv("./Video_Games_Sales_kaggle.csv")
+        df.columns = [
+        '제목', '플랫폼', '출시년도', '장르', '배급사',
+        '북미 판매량', '유럽 판매량', '일본 판매량', '기타 지역 판매량', '전체 글로벌 판매량',
+        '평론가 평점', '평론가 리뷰 수', '사용자 평점', '사용자 리뷰 수', '개발사', '등급']
+        df = df.dropna().reset_index(drop=True)
     else:
         raise ValueError('지원하지 않는 데이터셋입니다.')
     
 
     # 열 이름을 한글로 변경
     if data == '와인':
-        df.columns = ['알콜', '사과산', '구연산', '회분', '말산', '플라보노이드 폴리페놀', '논플라보노이드 폴리페놀', '페놀 총함량', '프로안토시아닌', '색상 강도', '색도', '알콜량', '타겟']
+        df.columns =  ['물질명', '말산', '회분', '회분알칼리도', '마그네슘', '총_페놀', '플라보노이드', '비플라보노이드_페놀', '프로안토시아닌', '색상_강도', '색조', 'OD280_OD315_희석_와인', '프롤린', '타겟']
     elif data == '당뇨병':
-        df.columns = ['연령', '성별', 'BMI', '포도당 혈액량', '혈압', '인슐린', '체질량 지수', '당뇨 직계 가족력', '평균 혈액압', '타겟']
+        df.columns = ['연령', '성별', 'BMI', 's1','s2','s3', 's4', 's5', 's6', '타겟']
     elif data == '붓꽃':
         df.columns = ['꽃받침 길이', '꽃받침 너비', '꽃잎 길이', '꽃잎 너비', '품종']
     df = df.dropna()
@@ -394,44 +403,31 @@ def 모델_평가(X_test, y_test, model):
         # 정확도 계산
         cm = confusion_matrix(y_test, y_pred_rounded)
         cm = cm[~np.all(cm == 0, axis=1)]
-        display(cm)
+        # display(cm)
 
         실제_라벨 = [f'실제{i}' for i in y_test_label]
         예측_라벨 = [f'예측{i}' for i in y_pred_label]
         confusion_df = pd.DataFrame(cm, columns=예측_라벨, index=실제_라벨)
-        print(y_pred_rounded.tolist()[:10], '>>>> target을 예측한 값의 일부에요!')
-        print(y_test.tolist()[:10], '>>>> target의 실제 값의 일부에요!')
+        print(y_pred_rounded.tolist()[:5], '>>>> target을 예측한 값의 일부에요!')
+        print(y_test.tolist()[:5], '>>>> target의 실제 값의 일부에요!')
         print('혼동행렬(confusion matrix)')
         display(confusion_df)
         print('\n')
-
-
-        # 대각선 상의 셀 값을 합산하여 올바른 예측 수를 구함
-        correct_predictions = np.sum(np.diag(confusion_df))
-
-        # 전체 샘플 수를 구함 (혼동 행렬의 모든 값을 합산)
-        total_samples = np.sum(confusion_df).sum()
-
         # 정확도 계산
-        accuracy = correct_predictions / total_samples
+        accuracy = accuracy_score(y_test, y_pred_rounded)
         return np.round(accuracy, 4)
     else:
         # 모델 예측
         y_pred = model.predict(X_test)
-        print(y_pred.tolist()[:10], '>>>> target을 예측한 값의 일부에요!')
-        print(y_test.tolist()[:10], '>>>> target의 실제 값의 일부에요!')
+        print(np.round(y_pred.tolist()[:10], 4), '>>>> target을 예측한 값의 일부에요!')
+        print(np.round(y_test.tolist()[:10], 4), '>>>> target의 실제 값의 일부에요!')
  
         # 평균 제곱 오차(Mean Squared Error) 계산
-        mse = mean_squared_error(y_test, y_pred)
-
-        # 결정 계수(R-squared) 계산
-        r_squared = r2_score(y_test, y_pred)
-
-        print(f'평균 제곱 오차(MSE): {mse:.4f}')
-        print(f'결정 계수(R-squared): {r_squared:.4f}')
+        rmse = mean_squared_error(y_test, y_pred)**0.5
+        print(f'RMSE(Root Mean Squared Error ): {rmse:.4f}')
         print('\n')
 
-        return np.round(r_squared, 4)
+        return np.round(rmse, 4)
 
 def 모델_선택(모델명):
     모델_딕셔너리 = {
